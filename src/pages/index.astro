@@ -11,7 +11,9 @@ const alle = await getCollection('ovingar');
   <section class="hero">
     <h1>{SITE.namn}</h1>
     <p class="hero__under">{SITE.undertittel}</p>
-    <div class="nivaa" role="group" aria-label="Vel nivå" data-nivaa-val>
+    <p class="hero__lead">{SITE.lead}</p>
+    <p class="nivaa-tekst" id="nivaa-tekst">Vil du ha noko som passar nivået ditt? Vel før du trekk:</p>
+    <div class="nivaa" role="group" aria-labelledby="nivaa-tekst" data-nivaa-val>
       <button type="button" data-nivaa="0" aria-pressed="true">Alle nivå</button>
       <button type="button" data-nivaa="1" aria-pressed="false">Nybyrjar</button>
       <button type="button" data-nivaa="2" aria-pressed="false">Middels</button>
@@ -36,6 +38,46 @@ const alle = await getCollection('ovingar');
         <div class="slot" data-slot={k}></div>
       ))}
     </div>
+  </section>
+
+  <section class="forklaring" aria-labelledby="slik">
+    <h2 id="slik">Slik fungerer det</h2>
+    <ol class="steg">
+      <li>
+        <h3>Trekk</h3>
+        <p>Trykk på «Trekk dagens dobbel». Du får to øvingar, éi frå kvar gruppe under.</p>
+      </li>
+      <li>
+        <h3>Lytt</h3>
+        <p>Spel av lydfila og finn pulsen i den, før du prøver spelar saman med den sjølv.</p>
+      </li>
+      <li>
+        <h3>Spel</h3>
+        <p>Opne notane som PDF, ta fram instrumentet og øv. Passar ikkje øvinga for deg? Trykk «Bytt denne».</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="forklaring" aria-labelledby="sidene">
+    <h2 id="sidene">Dei to sidene av spelinga</h2>
+    <p class="ingress">Ein god øveøkt har begge delar. Difor får du alltid éi øving frå kvar gruppe.</p>
+    <div class="par">
+      {(Object.keys(KATEGORIAR) as (keyof typeof KATEGORIAR)[]).map((k) => (
+        <div class={`sidekort sidekort--${k}`}>
+          <h3>{KATEGORIAR[k].namn}</h3>
+          <p>{KATEGORIAR[k].forklaring}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="forklaring" aria-labelledby="kven">
+    <h2 id="kven">Kven og korleis</h2>
+    <ul class="punkt">
+      <li><strong>Laga for unge musikantar</strong> og for lærarar og føresette som vil ha ei enkel øving å gje bort.</li>
+      <li><strong>Send dobbelen vidare.</strong> Trykk «Del denne dobbelen», så får mottakaren nøyaktig same to øvingar.</li>
+      <li><strong>Vil du velje sjølv?</strong> Sjå <a href={url('ovingar/')}>alle øvingane</a> samla, med nivå, tempo og notar.</li>
+    </ul>
   </section>
 
   <!-- Alle øvingar ligg skjult her; scriptet klonar to av dei inn i resultatet. -->

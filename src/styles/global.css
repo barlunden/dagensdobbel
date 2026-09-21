@@ -162,3 +162,29 @@ tbody tr:hover { background: color-mix(in srgb, var(--farge) 6%, transparent); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Forklaring på framsida ---------- */
+.hero__lead { max-width: 38rem; margin: 0 auto 1.25rem; }
+.nivaa-tekst { margin: 0 0 0.5rem; color: var(--dempa); font-size: 0.95rem; }
+.forklaring { margin-top: 3rem; }
+.forklaring h2 { margin-bottom: 0.75rem; }
+.steg { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; counter-reset: steg; }
+@media (min-width: 48rem) { .steg { grid-template-columns: repeat(3, 1fr); } }
+.steg li {
+  counter-increment: steg; position: relative;
+  background: var(--flate); border: 1px solid var(--linje); border-radius: var(--radius);
+  padding: 1rem 1.25rem 1.1rem 1.25rem;
+}
+.steg li::before {
+  content: counter(steg); display: grid; place-items: center; width: 2rem; height: 2rem; margin-bottom: 0.5rem;
+  border-radius: 50%; background: var(--tekst); color: var(--bg); font: 700 1rem var(--serif);
+}
+.steg h3 { margin: 0 0 0.25rem; }
+.steg p { margin: 0; color: var(--dempa); }
+.sidekort { border-left: 6px solid var(--farge); background: var(--flate); border-radius: var(--radius); padding: 1rem 1.25rem; border-top: 1px solid var(--linje); border-right: 1px solid var(--linje); border-bottom: 1px solid var(--linje); }
+.sidekort--lyrisk { --farge: var(--lyrisk); }
+.sidekort--teknisk { --farge: var(--teknisk); }
+.sidekort h3 { color: var(--farge); margin: 0 0 0.25rem; }
+.sidekort p { margin: 0; }
+.punkt { padding-left: 1.2rem; max-width: 42rem; }
+.punkt li { margin-bottom: 0.5rem; }
