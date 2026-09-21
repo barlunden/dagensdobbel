@@ -2,15 +2,18 @@
 import type { CollectionEntry } from 'astro:content';
 import { KATEGORIAR } from '../site.config';
 import { url } from '../lib/url';
+import { avled } from '../lib/musikk';
 
 interface Props {
   entry: CollectionEntry<'ovingar'>;
-  /** Vis lenke til eigen øvingsside og "bytt"-knapp (trekk-sida). */
+  /** Vis "bytt"-knapp (trekk-sida). */
   trekk?: boolean;
+  /** Vis lenke til eigen øvingsside. */
   lenke?: boolean;
 }
 const { entry, trekk = false, lenke = true } = Astro.props;
 const d = entry.data;
+const a = avled(d);
 const kat = KATEGORIAR[d.kategori];
 const nivaaNamn = ['', 'Nybyrjar', 'Middels', 'Viderekomen'][d.nivaa];
 ---
@@ -26,7 +29,10 @@ const nivaaNamn = ['', 'Nybyrjar', 'Middels', 'Viderekomen'][d.nivaa];
 
   <ul class="meta">
     <li><span class="prikkar" role="img" aria-label={`Nivå ${d.nivaa} av 3`}>{'●'.repeat(d.nivaa)}{'○'.repeat(3 - d.nivaa)}</span> {nivaaNamn}</li>
-    {d.tempo && <li>{d.tempo}</li>}
+    {a.toneart && <li>{a.toneart.namn}</li>}
+    {d.tempo && <li>{d.tempoEining} = {d.tempo}</li>}
+    {a.lagast && a.hogast && <li>{a.lagast.tekst}–{a.hogast.tekst}</li>}
+    <li>Rytme: {a.rytme.tekst}</li>
     {d.varigheit && <li>ca. {d.varigheit} min</li>}
   </ul>
 

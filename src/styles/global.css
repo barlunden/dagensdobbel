@@ -134,7 +134,7 @@ nav a:hover, nav a[aria-current] { border-bottom-color: var(--lyrisk); }
 .tabell-blokk--teknisk { --farge: var(--teknisk); }
 .tabell-blokk__under { color: var(--dempa); margin-top: 0; }
 .tabell-rull { overflow-x: auto; background: var(--flate); border: 1px solid var(--linje); border-radius: var(--radius); }
-table { width: 100%; border-collapse: collapse; min-width: 34rem; }
+table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--linje); vertical-align: top; }
 thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dempa); }
 tbody th { font-weight: 600; }
@@ -188,3 +188,41 @@ tbody tr:hover { background: color-mix(in srgb, var(--farge) 6%, transparent); }
 .sidekort p { margin: 0; }
 .punkt { padding-left: 1.2rem; max-width: 42rem; }
 .punkt li { margin-bottom: 0.5rem; }
+
+/* ---------- Søk og filter (oversikt) ---------- */
+.filter { margin-top: 1.5rem; background: var(--flate); border: 1px solid var(--linje); border-radius: var(--radius); padding: 1rem 1.25rem; box-shadow: var(--skugge); }
+.filter__topp { display: grid; gap: 0.75rem; grid-template-columns: 1fr; }
+@media (min-width: 40rem) { .filter__topp { grid-template-columns: 2fr 1.4fr 1fr; } }
+.felt { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; color: var(--dempa); }
+.felt input, .felt select {
+  min-height: 42px; padding: 0.4rem 0.6rem; border: 1px solid var(--linje); border-radius: 10px;
+  background: var(--bg); color: var(--tekst); font: 1rem var(--sans); width: 100%;
+}
+.filter__meir { margin-top: 0.75rem; }
+.filter__meir summary { cursor: pointer; font-weight: 600; padding: 0.4rem 0; }
+.filter__rutenett { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); margin-top: 0.5rem; }
+.filter fieldset { align-self: start; border: 1px solid var(--linje); border-radius: 10px; margin: 0; padding: 0.6rem 0.9rem 0.9rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.filter legend { font-weight: 700; padding-inline: 0.3rem; }
+.avkryss { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 32px; cursor: pointer; }
+.avkryssrad { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
+.filter__hint { margin: 0; color: var(--dempa); font-size: 0.88rem; }
+.filter__meir > .filter__hint { margin-top: 0.75rem; }
+.filter__botn { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.75rem; flex-wrap: wrap; }
+.filter__status { margin: 0; color: var(--dempa); }
+
+/* Sorterbare tabellhovud, ekstra kolonner */
+th .sort { all: unset; cursor: pointer; font: inherit; text-transform: inherit; letter-spacing: inherit; color: inherit; }
+th .sort:hover { color: var(--tekst); text-decoration: underline; }
+th .sort:focus-visible { outline: 3px solid var(--fokus); outline-offset: 2px; }
+th[aria-sort='ascending'] .sort::after { content: '\00a0↑'; }
+th[aria-sort='descending'] .sort::after { content: '\00a0↓'; }
+th[aria-sort='ascending'], th[aria-sort='descending'] { color: var(--tekst); }
+table small { display: block; font-weight: 400; color: var(--dempa); font-size: 0.82rem; }
+tbody th small { max-width: 16rem; }
+.stav, .tempo-celle { white-space: nowrap; }
+table { min-width: 62rem; }
+tbody th[scope='row'], thead th:first-child { position: sticky; left: 0; background: var(--flate); z-index: 1; min-width: 11rem; }
+
+.filter fieldset:last-child { grid-column: 1 / -1; }
+.filter fieldset:last-child .filter__hint { margin-bottom: 0; }
+.tabell-rull th, .tabell-rull td { padding-inline: 0.6rem; }
