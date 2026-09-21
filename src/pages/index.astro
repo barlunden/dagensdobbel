@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import OvingKort from '../components/OvingKort.astro';
+import { KATEGORIAR, SITE } from '../site.config';
+import { url } from '../lib/url';
+
+const alle = await getCollection('ovingar');
+---
+<Base>
+  <section class="hero">
+    <h1>{SITE.namn}</h1>
+    <p class="hero__under">{SITE.undertittel}</p>
+    <div class="nivaa" role="group" aria-label="Vel nivå" data-nivaa-val>
+      <button type="button" data-nivaa="0" aria-pressed="true">Alle nivå</button>
+      <button type="button" data-nivaa="1" aria-pressed="false">Nybyrjar</button>
+      <button type="button" data-nivaa="2" aria-pressed="false">Middels</button>
+      <button type="button" data-nivaa="3" aria-pressed="false">Viderekomen</button>
+    </div>
+    <button type="button" class="trekk-knapp" data-trekk>Trekk dagens dobbel</button>
+    <noscript>
+      <p>Trekkinga treng JavaScript. <a href={url('ovingar/')}>Sjå alle øvingar her.</a></p>
+    </noscript>
+  </section>
+
+  <p id="merknad" class="merknad" role="status" hidden></p>
+
+  <section id="resultat" class="resultat" aria-live="polite" tabindex="-1" hidden>
+    <div class="resultat__rad">
+      <h2 class="resultat__tittel">Dagens dobbel</h2>
+      <button type="button" class="knapp" data-del>Del denne dobbelen</button>
+      <span class="delstatus" role="status" data-delstatus></span>
+    </div>
+    <div class="par">
+      {(Object.keys(KATEGORIAR) as (keyof typeof KATEGORIAR)[]).map((k) => (
+        <div class="slot" data-slot={k}></div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Alle øvingar ligg skjult her; scriptet klonar to av dei inn i resultatet. -->
+  <div id="pool" hidden>
+    {alle.map((entry) => <OvingKort entry={entry} trekk />)}
+  </div>
+</Base>
+
+<script>
+  import '../scripts/dobbel.ts';
+</script>

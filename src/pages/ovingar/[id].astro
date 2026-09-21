@@ -1,0 +1,33 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import OvingKort from '../../components/OvingKort.astro';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const alle = await getCollection('ovingar');
+  return alle.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Base tittel={entry.data.tittel} skildring={entry.data.fokus}>
+  <p class="brodsmule"><a href={url('ovingar/')}>← Alle øvingar</a></p>
+  <OvingKort {entry} lenke={false} />
+  <div class="innhald"><Content /></div>
+
+  <section class="pdf">
+    <h2>Notar</h2>
+    <iframe
+      class="pdf__ramme"
+      src={url(`noter/${entry.data.noter}`)}
+      title={`Notar: ${entry.data.tittel}`}
+      loading="lazy"
+    ></iframe>
+    <p class="pdf__reserve">
+      <a class="knapp knapp--fylt" href={url(`noter/${entry.data.noter}`)} target="_blank" rel="noopener">Opne PDF i ny fane</a>
+      <a class="knapp" href={url(`noter/${entry.data.noter}`)} download>Last ned</a>
+    </p>
+  </section>
+</Base>

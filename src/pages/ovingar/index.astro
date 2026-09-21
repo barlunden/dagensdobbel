@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { KATEGORIAR } from '../../site.config';
+import { url } from '../../lib/url';
+
+const alle = await getCollection('ovingar');
+const grupper = (Object.keys(KATEGORIAR) as (keyof typeof KATEGORIAR)[]).map((k) => ({
+  k,
+  ...KATEGORIAR[k],
+  ovingar: alle
+    .filter((e) => e.data.kategori === k)
+    .sort((a, b) => a.data.nivaa - b.data.nivaa || a.data.tittel.localeCompare(b.data.tittel, 'nn')),
+}));
+---
+<Base tittel="Alle øvingar" skildring="Alle øvingane i Dagens Dobbel, sortert i lyrisk og teknisk.">
+  <h1>Alle øvingar</h1>
+  <p class="ingress">Vil du ikkje trekke? Vel ei øving sjølv. Ho ligg her, med lyd og notar.</p>
+
+  {grupper.map((g) => (
+    <section class={`tabell-blokk tabell-blokk--${g.k}`}>
+      <h2>{g.namn}</h2>
+      <p class="tabell-blokk__under">{g.skildring}</p>
+      <div class="tabell-rull">
+        <table>
+          <thead>
+            <tr><th scope="col">Øving</th><th scope="col">Fokus</th><th scope="col">Nivå</th><th scope="col">Tempo</th><th scope="col">Notar</th></tr>
+          </thead>
+          <tbody>
+            {g.ovingar.map((e) => (
+              <tr>
+                <th scope="row"><a href={url(`ovingar/${e.id}/`)}>{e.data.tittel}</a></th>
+                <td>{e.data.fokus}</td>
+                <td><span role="img" aria-label={`Nivå ${e.data.nivaa} av 3`}>{'●'.repeat(e.data.nivaa)}{'○'.repeat(3 - e.data.nivaa)}</span></td>
+                <td>{e.data.tempo ?? ''}</td>
+                <td><a href={url(`noter/${e.data.noter}`)} target="_blank" rel="noopener">PDF</a></td>
+              </tr>
+            ))}
+            {g.ovingar.length === 0 && <tr><td colspan="5">Ingen øvingar enno.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ))}
+</Base>

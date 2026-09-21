@@ -1,0 +1,51 @@
+---
+import '../styles/global.css';
+import { SITE } from '../site.config';
+import { url } from '../lib/url';
+
+interface Props {
+  tittel?: string;
+  skildring?: string;
+}
+const { tittel, skildring = SITE.undertittel } = Astro.props;
+const fullTittel = tittel ? `${tittel} · ${SITE.namn}` : SITE.namn;
+const her = Astro.url.pathname;
+const aktiv = (p: string) => (her === url(p) ? 'page' : undefined);
+---
+<!doctype html>
+<html lang="nn">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTittel}</title>
+    <meta name="description" content={skildring} />
+    <meta name="theme-color" content="#8c2f39" />
+    <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+  </head>
+  <body>
+    <a class="hopp" href="#innhald">Hopp til innhald</a>
+    <header class="topp">
+      <div class="omslag topp__inne">
+        <a class="logo" href={url('/')}>
+          <img src={url('favicon.svg')} alt="" width="32" height="32" />
+          <span>{SITE.namn}</span>
+        </a>
+        <nav aria-label="Hovudmeny">
+          <a href={url('/')} aria-current={aktiv('/')}>Trekk</a>
+          <a href={url('ovingar/')} aria-current={aktiv('ovingar/')}>Alle øvingar</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="innhald" class="omslag">
+      <slot />
+    </main>
+
+    <footer class="fot">
+      <div class="omslag">
+        <p>Dagens Dobbel er gratis og open for alle. Set du pris på det, kan du støtte vidare arbeid.</p>
+        <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="barlunden" data-description="Support me on Buy me a coffee!" data-message="Takk for at du stakk innom. Støtt vidare arbeid ved å spandere ein kaffi." data-color="#FF813F" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,164 @@
+/* ---------- Tokens ---------- */
+:root {
+  --bg: #faf6ef;
+  --flate: #ffffff;
+  --tekst: #2a2422;
+  --dempa: #6b625d;
+  --linje: #e4dccf;
+  --lyrisk: #8c2f39;
+  --lyrisk-bg: #f6e6e7;
+  --teknisk: #1f6f78;
+  --teknisk-bg: #dff0f1;
+  --fokus: #b8860b;
+  --kaffi: #ffdd00;
+  --radius: 14px;
+  --skugge: 0 1px 2px rgb(0 0 0 / 0.06), 0 6px 18px rgb(60 40 20 / 0.08);
+  --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1917;
+    --flate: #262220;
+    --tekst: #f2ece4;
+    --dempa: #b5aca3;
+    --linje: #3b3531;
+    --lyrisk: #e58a93;
+    --lyrisk-bg: #3a2427;
+    --teknisk: #6fc3cc;
+    --teknisk-bg: #1d3437;
+    --skugge: 0 1px 2px rgb(0 0 0 / 0.4);
+  }
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--tekst);
+  font: 1.0625rem/1.55 var(--sans);
+}
+main { flex: 1; padding-block: 1.5rem 3rem; }
+h1, h2, h3 { font-family: var(--serif); line-height: 1.15; margin: 0 0 0.5rem; }
+h1 { font-size: clamp(2rem, 6vw, 3.25rem); }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.3rem; }
+a { color: var(--teknisk); }
+:focus-visible { outline: 3px solid var(--fokus); outline-offset: 2px; border-radius: 4px; }
+.omslag { width: min(100% - 2rem, 62rem); margin-inline: auto; }
+.hopp { position: absolute; left: -999px; top: 0; background: var(--flate); padding: 0.5rem 1rem; z-index: 10; }
+.hopp:focus { left: 0.5rem; top: 0.5rem; }
+.ingress { color: var(--dempa); max-width: 40rem; }
+
+/* ---------- Topp ---------- */
+.topp { border-bottom: 1px solid var(--linje); background: var(--flate); }
+.topp__inne { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 0.6rem; flex-wrap: wrap; }
+.logo { display: inline-flex; align-items: center; gap: 0.5rem; font: 700 1.25rem var(--serif); color: var(--tekst); text-decoration: none; }
+nav { display: flex; gap: 1rem; }
+nav a { color: var(--tekst); text-decoration: none; padding: 0.35rem 0.1rem; border-bottom: 2px solid transparent; }
+nav a:hover, nav a[aria-current] { border-bottom-color: var(--lyrisk); }
+
+/* ---------- Knappar ---------- */
+.knapp {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0.55rem 1.1rem;
+  border: 2px solid currentColor; border-radius: 999px;
+  background: transparent; color: var(--tekst);
+  font: 600 0.95rem var(--sans); text-decoration: none; cursor: pointer;
+}
+.knapp:hover { background: var(--linje); }
+.knapp--fylt { background: var(--tekst); color: var(--bg); border-color: var(--tekst); }
+.knapp--fylt:hover { background: var(--tekst); opacity: 0.85; }
+
+/* ---------- Hero / trekk ---------- */
+.hero { text-align: center; padding-block: 1.5rem 1rem; }
+.hero__under { color: var(--dempa); font-size: 1.15rem; margin: 0 auto 1.25rem; max-width: 34rem; }
+.nivaa { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; margin-bottom: 1.25rem; }
+.nivaa button {
+  min-height: 40px; padding: 0.3rem 0.9rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--linje); background: var(--flate); color: var(--tekst); font: 500 0.9rem var(--sans);
+}
+.nivaa button[aria-pressed='true'] { background: var(--tekst); color: var(--bg); border-color: var(--tekst); }
+.trekk-knapp {
+  display: block; margin-inline: auto;
+  min-height: 60px; padding: 0.8rem 2.2rem; border: 0; border-radius: 999px; cursor: pointer;
+  background: linear-gradient(135deg, var(--lyrisk), var(--teknisk)); color: #fff;
+  font: 700 1.35rem var(--serif); box-shadow: var(--skugge);
+  transition: transform 0.12s ease;
+}
+.trekk-knapp:hover { transform: translateY(-2px) scale(1.02); }
+.trekk-knapp:active { transform: scale(0.98); }
+.merknad { text-align: center; color: var(--dempa); font-size: 0.95rem; }
+
+.resultat { margin-top: 1.5rem; scroll-margin-top: 1rem; }
+.resultat:focus { outline: none; }
+.resultat__rad { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.resultat__tittel { margin: 0; margin-right: auto; }
+.delstatus { color: var(--dempa); font-size: 0.9rem; min-width: 6rem; }
+.par { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+@media (min-width: 52rem) { .par { grid-template-columns: 1fr 1fr; } }
+.tom { color: var(--dempa); }
+
+/* ---------- Kort ---------- */
+.kort {
+  background: var(--flate); border: 1px solid var(--linje); border-top: 6px solid var(--farge, var(--linje));
+  border-radius: var(--radius); padding: 1.1rem 1.25rem 1.25rem; box-shadow: var(--skugge);
+  display: flex; flex-direction: column; gap: 0.6rem; height: 100%;
+}
+.kort--lyrisk { --farge: var(--lyrisk); --farge-bg: var(--lyrisk-bg); }
+.kort--teknisk { --farge: var(--teknisk); --farge-bg: var(--teknisk-bg); }
+.kort__kat {
+  align-self: flex-start; margin: 0; padding: 0.15rem 0.7rem; border-radius: 999px;
+  background: var(--farge-bg); color: var(--farge); font: 700 0.8rem var(--sans); letter-spacing: 0.04em; text-transform: uppercase;
+}
+.kort__tittel { margin: 0; }
+.kort__fokus { margin: 0; font-size: 1.1rem; }
+.kort__tips { margin: 0; color: var(--dempa); font-size: 0.97rem; }
+.meta { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; color: var(--dempa); font-size: 0.92rem; }
+.prikkar { color: var(--farge); letter-spacing: 0.1em; }
+.kort audio { width: 100%; margin-block: 0.25rem; }
+.knappar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: auto; padding-top: 0.4rem; }
+.kort--ny { animation: inn 0.35s ease-out; }
+@keyframes inn { from { opacity: 0; transform: translateY(10px) rotate(-1deg); } to { opacity: 1; transform: none; } }
+
+/* ---------- Oversikt ---------- */
+.tabell-blokk { margin-top: 2rem; }
+.tabell-blokk h2 { color: var(--farge); border-left: 6px solid var(--farge); padding-left: 0.6rem; }
+.tabell-blokk--lyrisk { --farge: var(--lyrisk); }
+.tabell-blokk--teknisk { --farge: var(--teknisk); }
+.tabell-blokk__under { color: var(--dempa); margin-top: 0; }
+.tabell-rull { overflow-x: auto; background: var(--flate); border: 1px solid var(--linje); border-radius: var(--radius); }
+table { width: 100%; border-collapse: collapse; min-width: 34rem; }
+th, td { text-align: left; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--linje); vertical-align: top; }
+thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dempa); }
+tbody th { font-weight: 600; }
+tbody tr:last-child > * { border-bottom: 0; }
+tbody tr:hover { background: color-mix(in srgb, var(--farge) 6%, transparent); }
+
+/* ---------- Øvingsside ---------- */
+.brodsmule { margin-top: 0; }
+.innhald { margin-block: 1rem; max-width: 42rem; }
+.pdf { margin-top: 2rem; }
+.pdf__ramme { display: none; width: 100%; height: 80vh; border: 1px solid var(--linje); border-radius: var(--radius); background: #fff; }
+@media (min-width: 48rem) { .pdf__ramme { display: block; } }
+.pdf__reserve { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+
+/* ---------- Fot ---------- */
+.fot { border-top: 1px solid var(--linje); background: var(--flate); padding-block: 1.75rem; text-align: center; }
+.fot p { margin: 0 auto 1rem; max-width: 32rem; color: var(--dempa); }
+.bmc {
+  display: inline-flex; align-items: center; gap: 0.5rem; min-height: 48px; padding: 0.6rem 1.4rem;
+  background: var(--kaffi); color: #1a1a1a; border-radius: 999px; font: 700 1rem var(--sans); text-decoration: none;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 0.25);
+}
+.bmc:hover { filter: brightness(0.95); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

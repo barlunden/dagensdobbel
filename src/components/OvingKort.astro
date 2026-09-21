@@ -1,0 +1,44 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { KATEGORIAR } from '../site.config';
+import { url } from '../lib/url';
+
+interface Props {
+  entry: CollectionEntry<'ovingar'>;
+  /** Vis lenke til eigen øvingsside og "bytt"-knapp (trekk-sida). */
+  trekk?: boolean;
+  lenke?: boolean;
+}
+const { entry, trekk = false, lenke = true } = Astro.props;
+const d = entry.data;
+const kat = KATEGORIAR[d.kategori];
+const nivaaNamn = ['', 'Nybyrjar', 'Middels', 'Viderekomen'][d.nivaa];
+---
+<article
+  class={`kort kort--${d.kategori}`}
+  data-id={entry.id}
+  data-kat={d.kategori}
+  data-nivaa={d.nivaa}
+>
+  <p class="kort__kat">{kat.namn}</p>
+  <h3 class="kort__tittel">{d.tittel}</h3>
+  <p class="kort__fokus">{d.fokus}</p>
+
+  <ul class="meta">
+    <li><span class="prikkar" role="img" aria-label={`Nivå ${d.nivaa} av 3`}>{'●'.repeat(d.nivaa)}{'○'.repeat(3 - d.nivaa)}</span> {nivaaNamn}</li>
+    {d.tempo && <li>{d.tempo}</li>}
+    {d.varigheit && <li>ca. {d.varigheit} min</li>}
+  </ul>
+
+  {d.tips && <p class="kort__tips"><strong>Tips:</strong> {d.tips}</p>}
+
+  <audio controls preload="none" src={url(`lyd/${d.lyd}`)}>
+    Nettlesaren din støttar ikkje lydavspeling.
+  </audio>
+
+  <div class="knappar">
+    <a class="knapp knapp--fylt" href={url(`noter/${d.noter}`)} target="_blank" rel="noopener">Opne notar (PDF)</a>
+    {lenke && <a class="knapp" href={url(`ovingar/${entry.id}/`)}>Øvingsside</a>}
+    {trekk && <button class="knapp" type="button" data-bytt>Bytt denne</button>}
+  </div>
+</article>
