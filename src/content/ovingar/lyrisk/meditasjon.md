@@ -1,14 +1,14 @@
 ---
-tittel: "Lange tonar"
+tittel: "Meditasjon"
 kategori: lyrisk
 nivaa: 1
-fokus: "Jamn tone og god pust gjennom heile tonen"
+fokus: "Fin og presis legato mellom tonane."
 tips: "Spel med fantastisk klang. Pust alltid slik at du startar neste tone til rett tid."
-tempo: 88
+tempo: 82
 varigheit: 1
-lyd: Skala-Bb.mp3
-noter: lyrisk-skala-Bb.pdf
-toneart: "C-dur"
+lyd: meditasjon.mp3
+noter: meditasjon-cm.pdf
+toneart: "d-moll"
 lagast: "C4"
 hogast: "E4"
 storsteIntervall: "stor ters"

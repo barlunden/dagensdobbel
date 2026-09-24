@@ -4,7 +4,7 @@ export const SITE = {
   undertittel: 'To korte etyder til dagens øvingsøkt: ei som handlar om klang, ei som handlar om teknikk.',
   lead: 'Trykk på knappen og få éi tilfeldig øving frå kvar av dei to gruppene. Kvar øving har notar og ei lydfil som akkompagnement. Det heile tek berre nokre få minutt. Gratis, utan innlogging.',
   // Bytt til di eiga Buy Me a Coffee-side:
-  bmcUrl: 'https://buymeacoffee.com/DITT-BRUKARNAMN',
+  bmcUrl: 'https://buymeacoffee.com/barlunden',
 };
 
 export const KATEGORIAR = {
