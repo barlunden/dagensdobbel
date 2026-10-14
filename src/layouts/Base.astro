@@ -2,12 +2,15 @@
 import '../styles/global.css';
 import { SITE } from '../site.config';
 import { url } from '../lib/url';
+import InstrumentVelgar from '../components/InstrumentVelgar.astro';
 
 interface Props {
   tittel?: string;
   skildring?: string;
+  /** Vis instrumentvelgaren (stemming og nøkkel). */
+  instrument?: boolean;
 }
-const { tittel, skildring = SITE.undertittel } = Astro.props;
+const { tittel, skildring = SITE.undertittel, instrument = true } = Astro.props;
 const fullTittel = tittel ? `${tittel} · ${SITE.namn}` : SITE.namn;
 const her = Astro.url.pathname;
 const aktiv = (p: string) => (her === url(p) ? 'page' : undefined);
@@ -36,6 +39,7 @@ const aktiv = (p: string) => (her === url(p) ? 'page' : undefined);
         </nav>
       </div>
     </header>
+    {instrument && <InstrumentVelgar />}
 
     <main id="innhald" class="omslag">
       <slot />
@@ -43,8 +47,10 @@ const aktiv = (p: string) => (her === url(p) ? 'page' : undefined);
 
     <footer class="fot">
       <div class="omslag">
-        <p>Dagens Dobbel er gratis og open for alle. Set du pris på det, kan du støtte vidare arbeid ved å spandere ein kaffi.</p>
-        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="barlunden" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Spander ein kaffi" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+        <p>Dagens Dobbel er gratis og open for alle. Set du pris på det, kan du støtte vidare arbeid.</p>
+        <a class="bmc" href={SITE.bmcUrl} target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true">☕</span> Kjøp meg ein kaffi
+        </a>
       </div>
     </footer>
   </body>

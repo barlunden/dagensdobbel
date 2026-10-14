@@ -22,8 +22,6 @@ const ovingar = defineCollection({
       fokus: z.string(), // ei linje: kva øver du på?
       tips: z.string().optional(), // kort tips til eleven
       varigheit: z.number().optional(), // minutt
-      lyd: z.string(), // filnamn i public/lyd/
-      noter: z.string(), // filnamn i public/noter/
 
       // --- Sorterbare parameterar (alle valfrie; manglande verdi hamnar sist) ---
       tempo: z.number().min(20).max(300).optional(), // slag per minutt

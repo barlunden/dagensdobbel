@@ -226,3 +226,26 @@ tbody th[scope='row'], thead th:first-child { position: sticky; left: 0; backgro
 .filter fieldset:last-child { grid-column: 1 / -1; }
 .filter fieldset:last-child .filter__hint { margin-bottom: 0; }
 .tabell-rull th, .tabell-rull td { padding-inline: 0.6rem; }
+
+/* ---------- Instrumentvelgar ---------- */
+.instrument { background: var(--flate); border-bottom: 1px solid var(--linje); }
+.instrument__inne { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding-block: 0.6rem; }
+.instrument__gruppe { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.instrument__tekst { font-size: 0.85rem; font-weight: 700; color: var(--dempa); text-transform: uppercase; letter-spacing: 0.05em; }
+.pillar { display: inline-flex; flex-wrap: wrap; gap: 0.35rem; }
+.pille { position: relative; display: inline-flex; }
+.pille input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.pille span {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 40px; padding: 0.2rem 0.85rem;
+  border: 1px solid var(--linje); border-radius: 999px; background: var(--bg); color: var(--tekst); font: 600 0.95rem var(--sans);
+}
+.pille input:checked + span { background: var(--tekst); color: var(--bg); border-color: var(--tekst); }
+.pille input:focus-visible + span { outline: 3px solid var(--fokus); outline-offset: 2px; }
+.pille input:disabled { cursor: not-allowed; }
+.pille input:disabled + span { opacity: 0.45; }
+.instrument__hjelp { flex: 1 1 16rem; font-size: 0.9rem; color: var(--dempa); }
+.instrument__hjelp p { margin: 0; }
+
+.lyd { display: flex; flex-direction: column; gap: 0.15rem; }
+.lyd__merke { margin: 0; font-size: 0.85rem; color: var(--dempa); }
+.instr-merknad { margin: 0; padding: 0.45rem 0.75rem; border-radius: 8px; font-size: 0.9rem; background: color-mix(in srgb, var(--fokus) 16%, transparent); }

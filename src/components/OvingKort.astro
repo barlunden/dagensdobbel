@@ -1,8 +1,9 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { KATEGORIAR } from '../site.config';
+import { KATEGORIAR, STANDARD_STEMMING, STEMMINGAR } from '../site.config';
 import { url } from '../lib/url';
 import { avled } from '../lib/musikk';
+import { filerFor, filerJson } from '../lib/filer';
 
 interface Props {
   entry: CollectionEntry<'ovingar'>;
@@ -14,6 +15,7 @@ interface Props {
 const { entry, trekk = false, lenke = true } = Astro.props;
 const d = entry.data;
 const a = avled(d);
+const f = filerFor(entry.id);
 const kat = KATEGORIAR[d.kategori];
 const nivaaNamn = ['', 'Nybyrjar', 'Middels', 'Viderekomen'][d.nivaa];
 ---
@@ -22,6 +24,7 @@ const nivaaNamn = ['', 'Nybyrjar', 'Middels', 'Viderekomen'][d.nivaa];
   data-id={entry.id}
   data-kat={d.kategori}
   data-nivaa={d.nivaa}
+  data-filer={filerJson(entry.id)}
 >
   <p class="kort__kat">{kat.namn}</p>
   <h3 class="kort__tittel">{d.tittel}</h3>
@@ -38,12 +41,16 @@ const nivaaNamn = ['', 'Nybyrjar', 'Middels', 'Viderekomen'][d.nivaa];
 
   {d.tips && <p class="kort__tips"><strong>Tips:</strong> {d.tips}</p>}
 
-  <audio controls preload="none" src={url(`lyd/${d.lyd}`)}>
-    Nettlesaren din støttar ikkje lydavspeling.
-  </audio>
+  <div class="lyd">
+    <p class="lyd__merke" data-lydmerke>Lydfil for {STEMMINGAR[STANDARD_STEMMING].merke}-instrument</p>
+    <audio controls preload="none" src={f.lyd[STANDARD_STEMMING]}>
+      Nettlesaren din støttar ikkje lydavspeling.
+    </audio>
+  </div>
+  <p class="instr-merknad" data-instr-merknad role="note" hidden></p>
 
   <div class="knappar">
-    <a class="knapp knapp--fylt" href={url(`noter/${d.noter}`)} target="_blank" rel="noopener">Opne notar (PDF)</a>
+    <a class="knapp knapp--fylt" href={f.noter.g} data-noter-lenke target="_blank" rel="noopener">Opne notar (PDF)</a>
     {lenke && <a class="knapp" href={url(`ovingar/${entry.id}/`)}>Øvingsside</a>}
     {trekk && <button class="knapp" type="button" data-bytt>Bytt denne</button>}
   </div>

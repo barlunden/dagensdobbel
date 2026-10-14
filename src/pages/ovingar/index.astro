@@ -3,19 +3,156 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { KATEGORIAR } from '../../site.config';
 import { url } from '../../lib/url';
+import { avled, STAVINGAR } from '../../lib/musikk';
+import { filerFor, filerJson } from '../../lib/filer';
 
 const alle = await getCollection('ovingar');
+const rader = alle.map((entry) => ({ entry, a: avled(entry.data) }));
+
+// Valg i filtera vert henta frå dei faktiske dataa, så dei veks med samlinga.
+const tal = (xs: (number | undefined)[]) =>
+  [...new Set(xs.filter((x): x is number => x !== undefined))].sort((a, b) => a - b);
+
+const tonar = new Map<number, string>();
+rader.forEach(({ a }) => [a.lagast, a.hogast].forEach((t) => t && tonar.set(t.midi, t.tekst)));
+const toneval = [...tonar].sort((x, y) => x[0] - y[0]);
+const ambitusval = tal(rader.map((r) => r.a.ambitus?.halvtonar));
+const ambitusNamn = new Map(rader.filter((r) => r.a.ambitus).map((r) => [r.a.ambitus!.halvtonar, r.a.ambitus!.namn]));
+const sprangval = tal(rader.map((r) => r.a.sprang?.halvtonar));
+const sprangNamn = new Map(rader.filter((r) => r.a.sprang).map((r) => [r.a.sprang!.halvtonar, r.a.sprang!.namn]));
+const toneartval = [
+  ...new Map(rader.filter((r) => r.a.toneart).map((r) => [r.a.toneart!.namn, r.a.toneart!.sortering] as const)),
+]
+  .sort((x, y) => x[1] - y[1])
+  .map((x) => x[0]);
+const tempoval = tal(rader.map((r) => r.entry.data.tempo));
+
 const grupper = (Object.keys(KATEGORIAR) as (keyof typeof KATEGORIAR)[]).map((k) => ({
   k,
   ...KATEGORIAR[k],
-  ovingar: alle
-    .filter((e) => e.data.kategori === k)
-    .sort((a, b) => a.data.nivaa - b.data.nivaa || a.data.tittel.localeCompare(b.data.tittel, 'nn')),
+  rader: rader
+    .filter((r) => r.entry.data.kategori === k)
+    .sort((x, y) => x.entry.data.nivaa - y.entry.data.nivaa || x.entry.data.tittel.localeCompare(y.entry.data.tittel, 'nn')),
 }));
+
+const sorteringar = [
+  ['nivaa', 'Nivå'],
+  ['toneart', 'Toneart (tal forteikn)'],
+  ['modus', 'Dur / moll'],
+  ['tempo', 'Tempo'],
+  ['lagast', 'Lågaste tone'],
+  ['hogast', 'Høgaste tone'],
+  ['ambitus', 'Ambitus'],
+  ['sprang', 'Største intervall'],
+  ['rytme', 'Rytmisk kompleksitet (stavingar)'],
+  ['tittel', 'Tittel'],
+];
+// Kolonner med sorteringsknapp i tabellhovudet
+const kolonner = [
+  ['nivaa', 'Nivå'],
+  ['toneart', 'Toneart'],
+  ['tempo', 'Tempo'],
+  ['lagast', 'Lågaste tone'],
+  ['hogast', 'Høgaste tone'],
+  ['ambitus', 'Ambitus'],
+  ['sprang', 'Største intervall'],
+  ['rytme', 'Rytme'],
+];
 ---
-<Base tittel="Alle øvingar" skildring="Alle øvingane i Dagens Dobbel, sortert i lyrisk og teknisk.">
+<Base tittel="Alle øvingar" skildring="Alle øvingane i Dagens Dobbel, med søk, filter og sortering på nivå, toneart, tempo, tonehøgd og rytme.">
   <h1>Alle øvingar</h1>
-  <p class="ingress">Vil du ikkje trekke? Vel ei øving sjølv. Ho ligg her, med lyd og notar.</p>
+  <p class="ingress">Vil du ikkje trekke? Søk, filtrer og sorter, og vel ei øving sjølv. Ho ligg her, med lyd og notar.</p>
+  <p class="filter__hint">Toneart og tonehøgd er oppgitt slik dei står i G-nøkkel. I F-nøkkel står notane ei oktav lågare.</p>
+
+  <form class="filter" data-filter role="search" aria-label="Søk og sortering">
+    <div class="filter__topp">
+      <label class="felt felt--sok">
+        <span>Søk</span>
+        <input type="search" name="q" placeholder="Tittel, fokus eller tips …" autocomplete="off" />
+      </label>
+      <label class="felt">
+        <span>Sorter etter</span>
+        <select name="sorter">
+          {sorteringar.map(([v, n]) => <option value={v}>{n}</option>)}
+        </select>
+      </label>
+      <label class="felt">
+        <span>Rekkjefølgje</span>
+        <select name="retning">
+          <option value="1">Stigande</option>
+          <option value="-1">Fallande</option>
+        </select>
+      </label>
+    </div>
+
+    <details class="filter__meir" data-meir>
+      <summary>Filter</summary>
+      <div class="filter__rutenett">
+        <fieldset>
+          <legend>Nivå</legend>
+          <label class="avkryss"><input type="checkbox" name="nivaa" value="1" checked /> Nybyrjar</label>
+          <label class="avkryss"><input type="checkbox" name="nivaa" value="2" checked /> Middels</label>
+          <label class="avkryss"><input type="checkbox" name="nivaa" value="3" checked /> Viderekomen</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Toneart</legend>
+          <label class="felt"><span>Dur / moll</span>
+            <select name="modus"><option value="">Begge</option><option value="dur">Dur</option><option value="moll">Moll</option></select>
+          </label>
+          <label class="felt"><span>Toneart</span>
+            <select name="toneart"><option value="">Alle</option>{toneartval.map((t) => <option value={t}>{t}</option>)}</select>
+          </label>
+          <label class="felt"><span>Maks tal forteikn</span>
+            <select name="forteikn"><option value="">Alle</option>{[0, 1, 2, 3, 4, 5, 6, 7].map((n) => <option value={n}>{n === 0 ? 'Ingen forteikn' : `${n} forteikn`}</option>)}</select>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Tempo (slag/min)</legend>
+          <label class="felt"><span>Frå</span>
+            <input type="number" name="tempoFra" min="20" max="300" inputmode="numeric" placeholder={tempoval[0] ? String(tempoval[0]) : ''} />
+          </label>
+          <label class="felt"><span>Til</span>
+            <input type="number" name="tempoTil" min="20" max="300" inputmode="numeric" placeholder={tempoval.length ? String(tempoval[tempoval.length - 1]) : ''} />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Tonehøgd</legend>
+          <label class="felt"><span>Lågaste tone ikkje under</span>
+            <select name="lagastFra"><option value="">Kva som helst</option>{toneval.map(([m, t]) => <option value={m}>{t}</option>)}</select>
+          </label>
+          <label class="felt"><span>Høgaste tone ikkje over</span>
+            <select name="hogastTil"><option value="">Kva som helst</option>{toneval.map(([m, t]) => <option value={m}>{t}</option>)}</select>
+          </label>
+          <label class="felt"><span>Maks ambitus</span>
+            <select name="ambitusMaks"><option value="">Kva som helst</option>{ambitusval.map((h) => <option value={h}>{ambitusNamn.get(h)}</option>)}</select>
+          </label>
+          <label class="felt"><span>Maks største intervall</span>
+            <select name="sprangMaks"><option value="">Kva som helst</option>{sprangval.map((h) => <option value={h}>{sprangNamn.get(h)}</option>)}</select>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Rytme (ta-ka-di-mi)</legend>
+          <p class="filter__hint">Vis berre øvingar som brukar desse stavingane:</p>
+          <div class="avkryssrad">
+            {STAVINGAR.map((s) => <label class="avkryss"><input type="checkbox" name="stav" value={s} checked /> {s}</label>)}
+          </div>
+        </fieldset>
+      </div>
+      <p class="filter__hint">
+        Toneart sorterast etter tal forteikn (C-dur og a-moll først, dur før moll). Rytmisk kompleksitet tel ulike stavingar:
+        ta = 1, ta-di = 2, ta-ka-di-mi = 4. Øvingar som manglar ein verdi hamnar sist, og vert skjulte når du filtrerer på den.
+      </p>
+    </details>
+
+    <div class="filter__botn">
+      <p class="filter__status" role="status" aria-live="polite" data-status></p>
+      <button type="reset" class="knapp">Nullstill</button>
+    </div>
+  </form>
 
   {grupper.map((g) => (
     <section class={`tabell-blokk tabell-blokk--${g.k}`}>
@@ -24,22 +161,63 @@ const grupper = (Object.keys(KATEGORIAR) as (keyof typeof KATEGORIAR)[]).map((k)
       <div class="tabell-rull">
         <table>
           <thead>
-            <tr><th scope="col">Øving</th><th scope="col">Fokus</th><th scope="col">Nivå</th><th scope="col">Tempo</th><th scope="col">Notar</th></tr>
+            <tr>
+              <th scope="col">Øving</th>
+              {kolonner.map(([key, namn]) => (
+                <th scope="col" data-kol={key} aria-sort="none"><button type="button" class="sort" data-sort={key}>{namn}</button></th>
+              ))}
+              <th scope="col">Notar</th>
+            </tr>
           </thead>
-          <tbody>
-            {g.ovingar.map((e) => (
-              <tr>
-                <th scope="row"><a href={url(`ovingar/${e.id}/`)}>{e.data.tittel}</a></th>
-                <td>{e.data.fokus}</td>
+          <tbody data-gruppe={g.k}>
+            {g.rader.map(({ entry: e, a }) => {
+              const f = filerFor(e.id);
+              return (
+              <tr
+                data-filer={filerJson(e.id)}
+                data-id={e.id}
+                data-nivaa={e.data.nivaa}
+                data-modus={a.toneart?.modus}
+                data-toneart={a.toneart?.namn}
+                data-tonesort={a.toneart?.sortering}
+                data-forteikn={a.toneart?.tal}
+                data-tempo={e.data.tempo}
+                data-lagast={a.lagast?.midi}
+                data-hogast={a.hogast?.midi}
+                data-ambitus={a.ambitus?.halvtonar}
+                data-sprang={a.sprang?.halvtonar}
+                data-rytme={a.rytme.tekst}
+                data-rytmeverdi={a.rytme.verdi}
+                data-sok={[e.data.tittel, e.data.fokus, e.data.tips ?? ''].join(' ').toLowerCase()}
+              >
+                <th scope="row">
+                  <a href={url(`ovingar/${e.id}/`)}>{e.data.tittel}</a>
+                  <small>{e.data.fokus}</small>
+                </th>
                 <td><span role="img" aria-label={`Nivå ${e.data.nivaa} av 3`}>{'●'.repeat(e.data.nivaa)}{'○'.repeat(3 - e.data.nivaa)}</span></td>
-                <td>{e.data.tempo ?? ''}</td>
-                <td><a href={url(`noter/${e.data.noter}`)} target="_blank" rel="noopener">PDF</a></td>
+                <td>{a.toneart ? <>{a.toneart.namn}<small>{a.toneart.symbol}</small></> : '–'}</td>
+                <td class="tempo-celle">{e.data.tempo ? `${e.data.tempoEining} = ${e.data.tempo}` : '–'}</td>
+                <td>{a.lagast?.tekst ?? '–'}</td>
+                <td>{a.hogast?.tekst ?? '–'}</td>
+                <td>{a.ambitus?.namn ?? '–'}</td>
+                <td>{a.sprang?.namn ?? '–'}</td>
+                <td class="stav">{a.rytme.tekst}</td>
+                <td><a href={f.noter.g} data-noter-lenke target="_blank" rel="noopener">PDF</a></td>
               </tr>
-            ))}
-            {g.ovingar.length === 0 && <tr><td colspan="5">Ingen øvingar enno.</td></tr>}
+              );
+            })}
+            {g.rader.length === 0 ? (
+              <tr><td colspan="10">Ingen øvingar enno.</td></tr>
+            ) : (
+              <tr data-tom hidden><td colspan="10">Ingen øvingar i denne gruppa passar filteret.</td></tr>
+            )}
           </tbody>
         </table>
       </div>
     </section>
   ))}
 </Base>
+
+<script>
+  import '../../scripts/oversikt.ts';
+</script>

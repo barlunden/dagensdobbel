@@ -1,0 +1,43 @@
+---
+import { NOKKLAR, STEMMINGAR } from '../site.config';
+const stemmingar = Object.entries(STEMMINGAR);
+const nokklar = Object.entries(NOKKLAR);
+---
+<section class="instrument" data-instrument hidden aria-label="Val av instrument">
+  <div class="omslag instrument__inne">
+    <div class="instrument__gruppe" role="radiogroup" aria-labelledby="instr-stemming">
+      <span id="instr-stemming" class="instrument__tekst">Stemming</span>
+      <div class="pillar">
+        {stemmingar.map(([id, s]) => (
+          <label class="pille">
+            <input type="radio" name="stemming" value={id} data-merke={s.merke} />
+            <span>{s.merke}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="instrument__gruppe" role="radiogroup" aria-labelledby="instr-nokkel" data-nokkel-gruppe>
+      <span id="instr-nokkel" class="instrument__tekst">Nøkkel</span>
+      <div class="pillar">
+        {nokklar.map(([id, n]) => (
+          <label class="pille">
+            <input type="radio" name="nokkel" value={id} />
+            <span>{n.namn}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="instrument__hjelp">
+      {stemmingar.map(([id, s]) => (
+        <p data-hjelp-for={id} hidden><strong>{s.merke}-instrument:</strong> {s.instrument}.</p>
+      ))}
+      <p data-nokkel-merknad hidden>F-nøkkel finst berre for C-instrument. Valet ditt vert hugsa på denne eininga.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/instrument.ts';
+</script>

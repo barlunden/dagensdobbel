@@ -1,3 +1,5 @@
+import { bruk } from './instrument';
+
 type Kat = 'lyrisk' | 'teknisk';
 const KATS: Kat[] = ['lyrisk', 'teknisk'];
 const NIVAA_NAMN = ['alle nivå', 'nybyrjar', 'middels', 'viderekomen'];
@@ -45,6 +47,7 @@ function visKort(kat: Kat) {
   const kort = kilde.cloneNode(true) as HTMLElement;
   kort.classList.add('kort--ny');
   slot.append(kort);
+  bruk(slot);
 }
 
 function oppdaterUrl() {
