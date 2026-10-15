@@ -4,7 +4,7 @@ export const SITE = {
   undertittel: 'To korte øvingar til dagens øktar: ei om vakker tone, ei om presis teknikk.',
   lead: 'Trykk på knappen og få éi tilfeldig øving frå kvar av to grupper. Kvar øving har notar og ei lydfil som viser korleis det skal låte, og tek berre nokre få minutt. Gratis, utan innlogging.',
   // Bytt til di eiga Buy Me a Coffee-side:
-  bmcUrl: 'https://buymeacoffee.com/DITT-BRUKARNAMN',
+  bmcUrl: 'https://buymeacoffee.com/barlunden',
 };
 
 export const KATEGORIAR = {
