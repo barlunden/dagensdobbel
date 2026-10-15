@@ -1,0 +1,11 @@
+@@ -252,3 +252,10 @@
+ 
+ /* Skjult element skal vere skjult, òg når klassen set display */
+ [hidden] { display: none !important; }
++
++/* Toneartvelgar i instrumentfeltet */
++.instrument__valg {
++  min-height: 40px; padding: 0 0.75rem; border: 1px solid var(--linje); border-radius: 10px;
++  background: var(--bg); color: var(--tekst); font: 600 0.95rem var(--sans);
++}
++.instrument__valg option:disabled { color: var(--dempa); }

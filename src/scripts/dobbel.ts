@@ -1,4 +1,4 @@
-import { bruk } from './instrument';
+import { bruk, egnar, hent, INSTRUMENT_ENDRA } from './instrument';
 
 type Kat = 'lyrisk' | 'teknisk';
 const KATS: Kat[] = ['lyrisk', 'teknisk'];
@@ -24,7 +24,8 @@ const byId = (id: string | null) => pool.find((c) => c.dataset.id === id);
 
 /** Kandidatar i ein kategori, filtrert på nivå. Fell tilbake til alle om nivået er tomt. */
 function kandidatar(kat: Kat) {
-  const alle = pool.filter((c) => c.dataset.kat === kat);
+  // Berre øvingar som finst for valt instrument (og toneart, om vald)
+  const alle = pool.filter((c) => c.dataset.kat === kat && egnar(c));
   if (!state.nivaa) return { liste: alle, fallback: false };
   const filtrert = alle.filter((c) => Number(c.dataset.nivaa) === state.nivaa);
   return filtrert.length ? { liste: filtrert, fallback: false } : { liste: alle, fallback: true };
@@ -41,7 +42,8 @@ function visKort(kat: Kat) {
   const slot = slots[kat];
   slot.replaceChildren();
   if (!kilde) {
-    slot.innerHTML = '<p class="tom">Ingen øvingar i denne kategorien enno.</p>';
+    const t = hent().toneart;
+    slot.innerHTML = `<p class="tom">${t ? `Ingen øvingar i ${t} i denne gruppa enno.` : 'Ingen øvingar i denne gruppa enno.'}</p>`;
     return;
   }
   const kort = kilde.cloneNode(true) as HTMLElement;
@@ -139,3 +141,13 @@ if (byId(l) || byId(t)) {
   state.ids.teknisk = byId(t) ? t : trekk('teknisk').id;
   visResultat(false);
 }
+
+// Byter eleven instrument eller toneart, byter vi ut øvingar som ikkje finst for det nye valet
+document.addEventListener(INSTRUMENT_ENDRA, () => {
+  if (resultat.hidden) return;
+  KATS.forEach((k) => {
+    const kort = byId(state.ids[k]);
+    if (!kort || !egnar(kort)) state.ids[k] = trekk(k).id;
+  });
+  visResultat(false);
+});

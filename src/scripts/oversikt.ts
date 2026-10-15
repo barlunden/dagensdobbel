@@ -1,4 +1,7 @@
 // Søk, filter og sortering på oversiktssida. Alt ligg som data-attributt på tabellradene.
+import { egnar, harNoter, hent, INSTRUMENT_ENDRA } from './instrument';
+import { toneartSortering, toneartSymbol, toneartTal } from '../lib/transponer';
+
 const form = document.querySelector<HTMLFormElement>('[data-filter]')!;
 const status = document.querySelector<HTMLElement>('[data-status]')!;
 const tbodyar = Array.from(document.querySelectorAll<HTMLTableSectionElement>('tbody[data-gruppe]'));
@@ -18,7 +21,6 @@ function lagFilter() {
   const stav = new Set(f.getAll('stav').map(String));
   const ord = s('q').toLowerCase().split(/\s+/).filter(Boolean);
   const modus = s('modus');
-  const toneart = s('toneart');
   const forteikn = valfritt('forteikn');
   const tempoFra = valfritt('tempoFra');
   const tempoTil = valfritt('tempoTil');
@@ -32,7 +34,6 @@ function lagFilter() {
     if (ord.some((o) => !(d.sok ?? '').includes(o))) return false;
     if (!nivaa.has(d.nivaa ?? '')) return false;
     if (modus && d.modus !== modus) return false;
-    if (toneart && d.toneart !== toneart) return false;
     // Manglar raden verdien (NaN), fell ho ut så snart filteret er sett
     if (forteikn !== undefined && !(n(d.forteikn) <= forteikn)) return false;
     if (tempoFra !== undefined && !(n(d.tempo) >= tempoFra)) return false;
@@ -79,16 +80,46 @@ function samanlikn(a: HTMLElement, b: HTMLElement, key: string, retning: number)
   return n(a.dataset.nivaa) - n(b.dataset.nivaa) || tittel(a).localeCompare(tittel(b), 'nn');
 }
 
+/* ---------- Toneart følgjer instrumentet ---------- */
+// Frontmatter har tonearten for B♭-instrument. For andre stemmingar ligg den transponerte
+// tonearten i data-filer, og raden får attributta (og cella) sine oppdaterte.
+function tilpassRad(r: HTMLElement, stemming: string) {
+  let namn = r.dataset.toneartOrig;
+  if (namn === undefined) namn = r.dataset.toneartOrig = r.dataset.toneart ?? '';
+  try {
+    const t = JSON.parse(r.dataset.filer ?? '{}').toneart?.[stemming];
+    if (typeof t === 'string') namn = t;
+  } catch {}
+  if (namn) {
+    r.dataset.toneart = namn;
+    r.dataset.modus = namn.endsWith('-moll') ? 'moll' : 'dur';
+    r.dataset.tonesort = String(toneartSortering(namn));
+    r.dataset.forteikn = String(toneartTal(namn));
+  }
+  const celle = r.querySelector<HTMLElement>('[data-celle="toneart"]');
+  if (celle && namn) {
+    const small = document.createElement('small');
+    small.textContent = toneartSymbol(namn);
+    celle.replaceChildren(document.createTextNode(namn), small);
+  }
+}
+
 /* ---------- Bruk ---------- */
 function bruk() {
+  const instr = hent();
   const passar = lagFilter();
+  let utanNotar = 0;
   const key = String(new FormData(form).get('sorter') ?? 'nivaa');
   const retning = Number(new FormData(form).get('retning') ?? 1);
   let synlege = 0;
 
   for (const tb of tbodyar) {
     const rader = Array.from(tb.querySelectorAll<HTMLTableRowElement>('tr[data-id]'));
-    rader.forEach((r) => (r.hidden = !passar(r)));
+    rader.forEach((r) => {
+      tilpassRad(r, instr.stemming);
+      if (!harNoter(r)) utanNotar++;
+      r.hidden = !(egnar(r) && passar(r));
+    });
     rader.sort((a, b) => samanlikn(a, b, key, retning)).forEach((r) => tb.append(r));
     const antal = rader.filter((r) => !r.hidden).length;
     synlege += antal;
@@ -102,7 +133,10 @@ function bruk() {
   hovud.forEach((th) =>
     th.setAttribute('aria-sort', th.dataset.kol === key ? (retning > 0 ? 'ascending' : 'descending') : 'none'),
   );
-  status.textContent = `Viser ${synlege} av ${alleRader.length} øvingar`;
+  status.textContent =
+    `Viser ${synlege} av ${alleRader.length} øvingar` +
+    (instr.toneart ? ` i ${instr.toneart}` : '') +
+    (utanNotar ? ` · ${utanNotar} manglar notar for ${instr.merke}-instrument` : '');
 }
 
 // Klikk på kolonnehovud: vel kolonnen, eller snu retninga om ho allereie er vald
@@ -119,6 +153,7 @@ document.addEventListener('click', (e) => {
   bruk();
 });
 
+document.addEventListener(INSTRUMENT_ENDRA, bruk);
 form.addEventListener('input', bruk);
 form.addEventListener('change', bruk);
 form.addEventListener('submit', (e) => e.preventDefault());

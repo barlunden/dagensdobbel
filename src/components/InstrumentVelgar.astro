@@ -1,16 +1,40 @@
 ---
-import { NOKKLAR, STEMMINGAR } from '../site.config';
+import { getCollection } from 'astro:content';
+import { NOKKLAR, STEMMINGAR, type StemmingId } from '../instrument.config';
+import { filerFor, noteNokkel } from '../lib/filer';
+import { toneartSortering } from '../lib/transponer';
+
 const stemmingar = Object.entries(STEMMINGAR);
 const nokklar = Object.entries(NOKKLAR);
+// Kva stemmingar har F-nøkkel? Brukt i forklaringa når valet er sperra.
+const fMerke = stemmingar.filter(([, s]) => (s.nokkler as readonly string[]).includes('f')).map(([, s]) => s.merke).join(', ');
+
+// Matrise: toneart (slik ho står i notane for stemminga) -> tal øvingar med notar, per stemming.
+// Lista over toneartar er unionen over alle instrument, så toneartar som finst for eit instrument
+// vert synlege (men grå) for dei andre til innhaldet er på plass.
+const alle = await getCollection('ovingar');
+const matrise: Record<string, Record<string, number>> = {};
+for (const e of alle) {
+  if (!e.data.toneart) continue;
+  const f = filerFor(e.id, e.data.toneart);
+  for (const st of Object.keys(STEMMINGAR) as StemmingId[]) {
+    const namn = f.toneart![st];
+    matrise[namn] ??= Object.fromEntries(Object.keys(STEMMINGAR).map((s) => [s, 0]));
+    if (f.noter[noteNokkel(st, 'g')]) matrise[namn][st]++;
+  }
+}
+const sortert = Object.keys(matrise).sort((a, b) => toneartSortering(a) - toneartSortering(b));
+const dur = sortert.filter((k) => k.endsWith('-dur'));
+const moll = sortert.filter((k) => k.endsWith('-moll'));
 ---
-<section class="instrument" data-instrument hidden aria-label="Val av instrument">
+<section class="instrument" data-instrument data-toneartar={JSON.stringify(matrise)} hidden aria-label="Val av instrument og toneart">
   <div class="omslag instrument__inne">
     <div class="instrument__gruppe" role="radiogroup" aria-labelledby="instr-stemming">
       <span id="instr-stemming" class="instrument__tekst">Stemming</span>
       <div class="pillar">
         {stemmingar.map(([id, s]) => (
           <label class="pille">
-            <input type="radio" name="stemming" value={id} data-merke={s.merke} />
+            <input type="radio" name="stemming" value={id} data-merke={s.merke} data-nokkler={s.nokkler.join(',')} />
             <span>{s.merke}</span>
           </label>
         ))}
@@ -29,11 +53,33 @@ const nokklar = Object.entries(NOKKLAR);
       </div>
     </div>
 
+    <div class="instrument__gruppe">
+      <label for="instr-toneart" class="instrument__tekst">Toneart</label>
+      <select id="instr-toneart" name="toneart" class="instrument__valg">
+        <option value="">Alle toneartar</option>
+        {dur.length > 0 && (
+          <optgroup label="Dur">
+            {dur.map((k) => <option value={k} data-namn={k}>{k}</option>)}
+          </optgroup>
+        )}
+        {moll.length > 0 && (
+          <optgroup label="Moll">
+            {moll.map((k) => <option value={k} data-namn={k}>{k}</option>)}
+          </optgroup>
+        )}
+      </select>
+    </div>
+
     <div class="instrument__hjelp">
-      {stemmingar.map(([id, s]) => (
-        <p data-hjelp-for={id} hidden><strong>{s.merke}-instrument:</strong> {s.instrument}.</p>
-      ))}
-      <p data-nokkel-merknad hidden>F-nøkkel finst berre for C-instrument. Valet ditt vert hugsa på denne eininga.</p>
+      {stemmingar.flatMap(([id, s]) =>
+        Object.entries(s.instrument).map(([nk, tekst]) => (
+          <p data-hjelp-for={`${id}-${nk}`} hidden>
+            <strong>{s.merke}-instrument{s.nokkler.length > 1 ? ` (${NOKKLAR[nk as keyof typeof NOKKLAR].namn})` : ''}:</strong> {tekst}.
+          </p>
+        )),
+      )}
+      <p data-nokkel-merknad hidden>F-nøkkel finst berre for {fMerke}-instrument. Valet ditt vert hugsa på denne eininga.</p>
+      <p data-toneart-merknad hidden></p>
     </div>
   </div>
 </section>

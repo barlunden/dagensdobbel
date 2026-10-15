@@ -20,11 +20,6 @@ const ambitusval = tal(rader.map((r) => r.a.ambitus?.halvtonar));
 const ambitusNamn = new Map(rader.filter((r) => r.a.ambitus).map((r) => [r.a.ambitus!.halvtonar, r.a.ambitus!.namn]));
 const sprangval = tal(rader.map((r) => r.a.sprang?.halvtonar));
 const sprangNamn = new Map(rader.filter((r) => r.a.sprang).map((r) => [r.a.sprang!.halvtonar, r.a.sprang!.namn]));
-const toneartval = [
-  ...new Map(rader.filter((r) => r.a.toneart).map((r) => [r.a.toneart!.namn, r.a.toneart!.sortering] as const)),
-]
-  .sort((x, y) => x[1] - y[1])
-  .map((x) => x[0]);
 const tempoval = tal(rader.map((r) => r.entry.data.tempo));
 
 const grupper = (Object.keys(KATEGORIAR) as (keyof typeof KATEGORIAR)[]).map((k) => ({
@@ -99,9 +94,6 @@ const kolonner = [
           <legend>Toneart</legend>
           <label class="felt"><span>Dur / moll</span>
             <select name="modus"><option value="">Begge</option><option value="dur">Dur</option><option value="moll">Moll</option></select>
-          </label>
-          <label class="felt"><span>Toneart</span>
-            <select name="toneart"><option value="">Alle</option>{toneartval.map((t) => <option value={t}>{t}</option>)}</select>
           </label>
           <label class="felt"><span>Maks tal forteikn</span>
             <select name="forteikn"><option value="">Alle</option>{[0, 1, 2, 3, 4, 5, 6, 7].map((n) => <option value={n}>{n === 0 ? 'Ingen forteikn' : `${n} forteikn`}</option>)}</select>
@@ -195,7 +187,7 @@ const kolonner = [
                   <small>{e.data.fokus}</small>
                 </th>
                 <td><span role="img" aria-label={`Nivå ${e.data.nivaa} av 3`}>{'●'.repeat(e.data.nivaa)}{'○'.repeat(3 - e.data.nivaa)}</span></td>
-                <td>{a.toneart ? <>{a.toneart.namn}<small>{a.toneart.symbol}</small></> : '–'}</td>
+                <td data-celle="toneart">{a.toneart ? <>{a.toneart.namn}<small>{a.toneart.symbol}</small></> : '–'}</td>
                 <td class="tempo-celle">{e.data.tempo ? `${e.data.tempoEining} = ${e.data.tempo}` : '–'}</td>
                 <td>{a.lagast?.tekst ?? '–'}</td>
                 <td>{a.hogast?.tekst ?? '–'}</td>

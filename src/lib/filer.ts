@@ -1,37 +1,51 @@
 // Finn lyd- og notefilene til ei øving ut frå mappestrukturen (ingen filnamn i frontmatter):
-//   public/lyd/<id>/c.mp3, bb.mp3, eb.mp3, f.mp3      (éi per stemming)
-//   public/noter/<id>/g-nokkel.pdf, f-nokkel.pdf      (éi per nøkkel)
-// Krav: standardstemminga (bb.mp3) og g-nokkel.pdf. Resten er valfrie; manglar dei, fell sida tilbake med ei melding.
-// @ts-expect-error Node.js types are not included in this project’s TypeScript config.
+//   public/lyd/<id>/bb.mp3                  éi lydfil, felles for alle instrument (namnet er LYDFIL i instrument.config)
+//   public/noter/<id>/<stemming>-<nøkkel>.pdf   t.d. bb-g.pdf, c-g.pdf, c-f.pdf, eb-g.pdf, f-g.pdf
+// Krav: lydfila og standardstemminga si G-nøkkel-PDF (bb-g.pdf). Resten er valfrie; manglar dei,
+// får eleven ei melding i staden for feil noter.
 import { existsSync } from 'node:fs';
-// @ts-expect-error Node.js types are not included in this project’s TypeScript config.
 import { join } from 'node:path';
-// @ts-expect-error Node.js types are not included in this project’s TypeScript config.
-import { cwd } from 'node:process';
 import { url } from './url';
-import { NOKKLAR, STANDARD_STEMMING, STEMMINGAR, type NokkelId, type StemmingId } from '../site.config';
+import { LYDFIL, STANDARD_STEMMING, STEMMINGAR, type StemmingId } from '../instrument.config';
+import type { Toneart } from './musikk';
+import { transponerToneart } from './transponer';
 
 export interface Filer {
-  lyd: Partial<Record<StemmingId, string>>;
-  noter: Partial<Record<NokkelId, string>>;
+  lyd: string;
+  /** Nøkkel "<stemming>-<nøkkel>", t.d. "c-f", til URL. Berre filer som finst. */
+  noter: Record<string, string>;
+  /** Notert toneart per stemming (rekna ut frå `toneart`, som gjeld B♭-notasjonen). */
+  toneart?: Record<StemmingId, string>;
 }
 
-const finst = (rel: string) => existsSync(join(cwd(), 'public', rel));
+const finst = (rel: string) => existsSync(join(process.cwd(), 'public', rel));
 
-export function filerFor(id: string): Filer & { lyd: Record<typeof STANDARD_STEMMING, string>; noter: { g: string } } {
-  const lyd: Filer['lyd'] = {};
-  for (const s of Object.keys(STEMMINGAR) as StemmingId[]) {
-    const rel = `lyd/${id}/${s}.mp3`;
-    if (finst(rel)) lyd[s] = url(rel);
+export const noteNokkel = (stemming: string, nokkel: string) => `${stemming}-${nokkel}`;
+
+export function filerFor(id: string, toneart?: Toneart): Filer {
+  const lydRel = `lyd/${id}/${LYDFIL}`;
+  if (!finst(lydRel)) throw new Error(`Øvinga «${id}» manglar public/${lydRel}`);
+
+  const noter: Record<string, string> = {};
+  for (const [stemming, v] of Object.entries(STEMMINGAR)) {
+    for (const nokkel of v.nokkler as readonly string[]) {
+      const rel = `noter/${id}/${noteNokkel(stemming, nokkel)}.pdf`;
+      if (finst(rel)) noter[noteNokkel(stemming, nokkel)] = url(rel);
+    }
   }
-  const noter: Filer['noter'] = {};
-  for (const n of Object.keys(NOKKLAR) as NokkelId[]) {
-    const rel = `noter/${id}/${NOKKLAR[n].fil}`;
-    if (finst(rel)) noter[n] = url(rel);
+  const standard = noteNokkel(STANDARD_STEMMING, 'g');
+  if (!noter[standard]) throw new Error(`Øvinga «${id}» manglar public/noter/${id}/${standard}.pdf`);
+
+  const ut: Filer = { lyd: url(lydRel), noter };
+  if (toneart) {
+    ut.toneart = Object.fromEntries(
+      Object.entries(STEMMINGAR).map(([st, v]) => [st, transponerToneart(toneart, v.forskyving)]),
+    ) as Record<StemmingId, string>;
   }
-  if (!lyd[STANDARD_STEMMING]) throw new Error(`Øvinga «${id}» manglar public/lyd/${id}/${STANDARD_STEMMING}.mp3`);
-  if (!noter.g) throw new Error(`Øvinga «${id}» manglar public/noter/${id}/${NOKKLAR.g.fil}`);
-  return { lyd: lyd as Record<typeof STANDARD_STEMMING, string>, noter: noter as { g: string } };
+  return ut;
 }
 
-export const filerJson = (id: string) => JSON.stringify(filerFor(id));
+/** PDF for standardstemminga (G-nøkkel). Alltid til stades, ellers stoppar bygget. */
+export const standardNoter = (f: Filer) => f.noter[noteNokkel(STANDARD_STEMMING, 'g')];
+
+export const filerJson = (id: string, toneart?: Toneart) => JSON.stringify(filerFor(id, toneart));

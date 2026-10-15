@@ -1,0 +1,9 @@
+@@ -62,7 +57,7 @@
+ <Base tittel="Alle øvingar" skildring="Alle øvingane i Dagens Dobbel, med søk, filter og sortering på nivå, toneart, tempo, tonehøgd og rytme.">
+   <h1>Alle øvingar</h1>
+   <p class="ingress">Vil du ikkje trekke? Søk, filtrer og sorter, og vel ei øving sjølv. Ho ligg her, med lyd og notar.</p>
+-  <p class="filter__hint">Toneart og tonehøgd er oppgitt slik dei står i notane for B♭-instrument (G-nøkkel). Andre instrument får same øving transponert.</p>
++  <p class="filter__hint">Toneart følgjer instrumentet og tonearten du har valt øvst på sida. Tonehøgd (lågaste og høgaste tone) og ambitus er oppgitt for B♭-instrument i G-nøkkel.</p>
+ 
+   <form class="filter" data-filter role="search" aria-label="Søk og sortering">
+     <div class="filter__topp">
