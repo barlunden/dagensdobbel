@@ -40,7 +40,7 @@ const nivaaNamn = ['', 'Nybyrjar', 'Middels', 'Viderekomen'][d.nivaa];
       </li>
     )}
     {d.tempo && <li>{d.tempoEining} = {d.tempo}</li>}
-    {a.lagast && a.hogast && <li>Tonehøgd i {std}-notasjon: {a.lagast.tekst}–{a.hogast.tekst}</li>}
+    {a.ambitus && <li>Omfang: {a.ambitus.namn}</li>}
     <li>Rytme: {a.rytme.tekst}</li>
     {d.varigheit && <li>ca. {d.varigheit} min</li>}
   </ul>

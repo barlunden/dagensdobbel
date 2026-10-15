@@ -1,5 +1,5 @@
 ---
-tittel: "C-dur i tersar"
+tittel: "Bb-dur i tersar"
 kategori: teknisk
 nivaa: 1
 fokus: "Tydeleg og stødig rytmikk"

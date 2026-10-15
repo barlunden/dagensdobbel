@@ -1,26 +1,26 @@
 // Ein stad for det du oftast vil endre.
 export const SITE = {
   namn: 'Dagens Dobbel',
-  undertittel: 'To korte øvingar til dagens øktar: ei om vakker tone, ei om presis teknikk.',
-  lead: 'Trykk på knappen og få éi tilfeldig øving frå kvar av to grupper. Kvar øving har notar og ei lydfil som viser korleis det skal låte, og tek berre nokre få minutt. Gratis, utan innlogging.',
+  undertittel: 'Ei øving for klang og ei for teknikk. Tilfeldig valt, kvar dag.',
+  lead: 'Dagens Dobbel gir eleven to tilfeldige øvingar. Den eine har fokus på klang, den andre teknikk. Resultatet er ei lita, konkret økt som er enkel å gå i gang med. Øvinga kan vere ei typisk dagleg øving, ein liten song eller ei lita etyde.',
   // Bytt til di eiga Buy Me a Coffee-side:
   bmcUrl: 'https://buymeacoffee.com/barlunden',
 };
 
 export const KATEGORIAR = {
   lyrisk: {
-    namn: 'Lyrisk og klangfull',
-    kort: 'Lyrisk',
-    skildring: 'Tone, klang, frasering og song på instrumentet.',
+    namn: 'Lange linjer og klang',
+    kort: 'Linjer',
+    skildring: 'Klang, lange linjer og frasering',
     forklaring:
-      'Her øver du på å spele vakkert: jamn og rund tone, lange liner og song på instrumentet. Lytt nøye, og la lufta og klangen føre an.',
+      'Her øver du på å skape vakker klang, lange liner og song på instrumentet. Lytt nøye, og lat lufta lede deg fram.',
   },
   teknisk: {
-    namn: 'Teknisk og artikulert',
+    namn: 'Teknikk og artikulasjon',
     kort: 'Teknisk',
-    skildring: 'Artikulasjon, presisjon, fingerferdigheit og tempo.',
+    skildring: 'Artikulasjon, presisjon, koordinasjon og tempo.',
     forklaring:
-      'Her øver du på å spele nøyaktig: tydeleg artikulasjon, jamn rytme og sikre fingrar eller tunge. Start sakte, og auk tempoet litt om gongen.',
+      'Her øver du på å spele nøyaktig: tydeleg artikulasjon, stødig rytme og sikre rørsler. Finn øvingar som passar for ditt nivå.',
   },
 } as const;
 

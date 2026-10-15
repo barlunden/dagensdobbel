@@ -1,5 +1,5 @@
 ---
-tittel: "C-dur marcato"
+tittel: "Bb-dur marcato"
 kategori: teknisk
 nivaa: 1
 fokus: "Tydeleg ansats på kvar tone"
