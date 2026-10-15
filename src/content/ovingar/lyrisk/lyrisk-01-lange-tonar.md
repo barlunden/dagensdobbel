@@ -1,5 +1,5 @@
 ---
-tittel: "Lange tonar"
+tittel: "Bb-dur heilnotar"
 kategori: lyrisk
 nivaa: 1
 fokus: "Jamn tone og god støtte gjennom heile tonen"

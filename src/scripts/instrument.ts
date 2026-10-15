@@ -1,4 +1,5 @@
-// Eleven vel stemming (C, B♭, E♭, F), nøkkel (G, F) og eventuelt toneart. Valet gjeld alle sider og vert hugsa i nettlesaren.
+// Eleven vel først nøkkel (G eller F), så stemming (C, B♭, E♭, F) når nøkkelen er G, og eventuelt toneart.
+// F-nøkkel finst berre utransponert (C-instrument), så då vert stemminga sett av seg sjølv og valet skjult. Valet gjeld alle sider og vert hugsa i nettlesaren.
 // Alle brukar same lydfil. Kvart element med data-filer="{lyd, noter, toneart}" får rett PDF
 // (transponert for instrumentet) og notert toneart. Trekk og oversikt brukar `egnar` til å vise berre
 // øvingar som finst for instrumentet (og tonearten, om ho er vald), og lyttar på `instrument-endra`.
@@ -15,13 +16,20 @@ interface Filer {
 export const INSTRUMENT_ENDRA = 'instrument-endra';
 const LAGRING = 'dagens-dobbel:instrument';
 const STEMMINGAR: Stemming[] = ['c', 'bb', 'eb', 'f'];
-const val: { stemming: Stemming; nokkel: Nokkel; toneart: string } = { stemming: STANDARD_STEMMING, nokkel: 'g', toneart: '' };
+// sisteG: stemminga eleven hadde i G-nøkkel, så ho kjem attende når eleven går tilbake frå F-nøkkel
+const val: { stemming: Stemming; nokkel: Nokkel; toneart: string; sisteG: Stemming } = {
+  stemming: STANDARD_STEMMING,
+  nokkel: 'g',
+  toneart: '',
+  sisteG: STANDARD_STEMMING,
+};
 
 try {
   const lagra = JSON.parse(localStorage.getItem(LAGRING) ?? 'null');
   if (lagra && STEMMINGAR.includes(lagra.stemming)) val.stemming = lagra.stemming;
   if (lagra && (lagra.nokkel === 'g' || lagra.nokkel === 'f')) val.nokkel = lagra.nokkel;
   if (lagra && typeof lagra.toneart === 'string') val.toneart = lagra.toneart;
+  if (lagra && STEMMINGAR.includes(lagra.sisteG)) val.sisteG = lagra.sisteG;
 } catch {
   /* lagring ikkje tilgjengeleg – bruk standardval */
 }
@@ -40,6 +48,19 @@ const radio = (s: Stemming) => bar?.querySelector<HTMLInputElement>(`input[name=
 const merke = (s: Stemming) => radio(s)?.dataset.merke ?? s.toUpperCase();
 // Kva nøklar stemminga har notar for (frå data-nokkler på radioknappen)
 const tillatne = (s: Stemming) => (radio(s)?.dataset.nokkler ?? 'g').split(',');
+// Stemminga som høyrer til F-nøkkel (første med F i data-nokkler, i praksis C)
+const fStemming = (): Stemming | undefined =>
+  STEMMINGAR.find((s) => (radio(s)?.dataset.nokkler ?? '').split(',').includes('f'));
+/** Bruk nøkkelvalet: F-nøkkel set stemminga automatisk, G-nøkkel hentar attende førre G-stemming. */
+function velNokkel(nk: Nokkel) {
+  val.nokkel = nk;
+  if (nk === 'f') {
+    const fs = fStemming();
+    if (fs) val.stemming = fs;
+  } else {
+    val.stemming = val.sisteG;
+  }
+}
 const effektivNokkel = (): Nokkel => (tillatne(val.stemming).includes(val.nokkel) ? val.nokkel : 'g');
 const harInnhald = (toneart: string, s: Stemming) => (matrise[toneart]?.[s] ?? 0) > 0;
 // Vald toneart gjeld berre når ho har øvingar for stemminga (elles: alle toneartar)
@@ -123,21 +144,19 @@ export function bruk(rot: ParentNode = document) {
 
 function synkBar() {
   if (!bar) return;
-  const ok = tillatne(val.stemming);
   const nokkel = effektivNokkel();
   bar.querySelectorAll<HTMLInputElement>('input[name="stemming"]').forEach((i) => (i.checked = i.value === val.stemming));
   const nokkelRadioar = bar.querySelectorAll<HTMLInputElement>('input[name="nokkel"]');
   nokkelRadioar.forEach((i) => {
     i.checked = i.value === nokkel;
-    i.disabled = !ok.includes(i.value);
+    i.disabled = false; // nøkkelen vert vald først; stemminga rettar seg etter han
   });
-  const manglarNokkel = ok.length < nokkelRadioar.length;
-  bar.querySelector('[data-nokkel-gruppe]')?.classList.toggle('er-av', manglarNokkel);
+  // F-nøkkel: stemminga er gitt, så valet av stemming er skjult
+  const stemmingGruppe = bar.querySelector<HTMLElement>('[data-stemming-gruppe]');
+  if (stemmingGruppe) stemmingGruppe.hidden = nokkel === 'f';
 
   const hjelpId = bar.querySelector(`[data-hjelp-for="${val.stemming}-${nokkel}"]`) ? `${val.stemming}-${nokkel}` : `${val.stemming}-g`;
   bar.querySelectorAll<HTMLElement>('[data-hjelp-for]').forEach((p) => (p.hidden = p.dataset.hjelpFor !== hjelpId));
-  const nm = bar.querySelector<HTMLElement>('[data-nokkel-merknad]');
-  if (nm) nm.hidden = !manglarNokkel;
 
   // Toneartar utan øvingar for stemminga vert grå og kan ikkje veljast
   if (velgar) {
@@ -161,9 +180,10 @@ bar?.addEventListener('change', (e) => {
   const inp = e.target as HTMLInputElement | HTMLSelectElement;
   if (inp.name === 'stemming') {
     val.stemming = inp.value as Stemming;
+    val.sisteG = val.stemming; // stemming kan berre veljast i G-nøkkel
     // Tonearten gjeld ikkje om ho manglar øvingar for den nye stemminga
     if (val.toneart && !harInnhald(val.toneart, val.stemming)) val.toneart = '';
-  } else if (inp.name === 'nokkel') val.nokkel = inp.value as Nokkel;
+  } else if (inp.name === 'nokkel') velNokkel(inp.value as Nokkel);
   else if (inp.name === 'toneart') val.toneart = inp.value;
   else return;
   try {
@@ -177,6 +197,8 @@ bar?.addEventListener('change', (e) => {
 });
 
 if (bar) {
+  if (val.nokkel === 'g') val.sisteG = val.stemming;
+  velNokkel(val.nokkel);
   synkBar();
   bar.hidden = false;
 }
